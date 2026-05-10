@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEBAS v8.4 - HMCR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #0a0a0a; }
+        .card { background: #1a1a1a; border: 1px solid #262626; }
+        .input, select, textarea {
+            background: #0f0f0f;
+            border: 1px solid #2d2d2d;
+            color: #e5e5e5;
+            transition: all 0.2s;
+        }
+        .input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+        label { font-size: 0.75rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+        .chip { transition: all 0.2s; }
+        .chip.active { background: #2563eb; border-color: #3b82f6; color: white; }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-[#1f1f1f]">
+        <div class="max-w-[1400px] mx-auto px-4 py-3 flex flex-col md:flex-row gap-3 items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center font-bold">S</div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none">SEBAS v8.4</h1>
+                    <p class="text-[11px] text-gray-500">HMCR - Neonatología</p>
+                </div>
+            </div>
+            <div class="flex-1 w-full md:max-w-xl flex gap-2">
+                <div class="relative flex-1">
+                    <input id="input-busqueda" type="text" placeholder="Buscar por: Nombre / Expediente / Diagnóstico / Cama / Sala" class="input w-full rounded-xl pl-10 pr-4 py-2.5 text-sm">
+                    <svg class="w-4 h-4 absolute left-3 top-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <button id="btn-buscar" class="px-4 py-2.5 bg-[#1f1f1f] hover:bg-[#2a2a2a] rounded-xl text-sm border border-[#2d2d2d]">Buscar</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1400px] mx-auto p-4 md:p-6 space-y-5">
+        <form id="form-sebas" class="space-y-5">
+            
+            <!-- IDENTIFICACIÓN -->
+            <section class="card rounded-2xl p-5">
+                <h2 class="font-semibold text-blue-400 mb-4 flex items-center gap-2">
+                    <span class="w-1.5 h-5 bg-blue-500 rounded-full"></span> Identificación RN
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                    <div class="lg:col-span-2">
+                        <label>Nombre RN</label>
+                        <input id="nombreRN" class="input w-full rounded-lg px-3 py-2 mt-1">
+                    </div>
+                    <div>
+                        <label>Expediente</label>
+                        <input id="expediente" class="input w-full rounded-lg px-3 py-2 mt-1">
+                    </div>
+                    <div>
+                        <label>Sexo</label>
+                        <select id="sexo" class="input w-full rounded-lg px-3 py-2 mt-1">
+                            <option value="">Seleccione</option>
+                            <option value="Hombre">Hombre</option>
+                            <option value="Mujer">Mujer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Fecha Nac</label>
+                        <input id="fechaNac" type="date" class="input w-full rounded-lg px-3 py-2 mt-1">
+                    </div>
+                    <div>
+                        <label>Hora</label>
+                        <input id="horaNac" type="time" class="input w-full rounded-lg px-3 py-2 mt-1">
+                    </div>
+                    <div>
+                        <label>Peso (g)</label>
+                        <input id="peso" type="number" class="input w-full rounded-lg px-3 py-2 mt-1">
+                    </div>
+                    <div>
+                        <label>Talla (cm)</label>
+                        <input id="talla" type="number" step="0.1" class="input w-full rounded-lg px-3 py-2 mt-1">
+                    </div>
+                    <div>
+                        <label>PC (cm)</label>
+                        <input id="pc" type="number" step="0.1" class="input w-full rounded-lg px-3 py-2 mt-1">
+                    </div>
+                    <div>
+                        <label>EG (sem)</label>
+                        <input id="eg" class="input w-full rounded-lg px-3 py-2 mt-1">
+                    </div>
+                    <div>
+                        <label>Apgar 1'</label>
+                        <input id="apgar1" type="number" min="0" max="10" class="input w-full rounded-lg px-3 py-2 mt-1">
+                    </div>
+                    <div>
+                        <label>Apgar 5'</label>
+                        <input id="apgar5" type="number" min="0" max="10" class="input w-full rounded-lg px-3 py-2 mt-1">
+                    </div>
+                </div>
+            </section>
+
+            <!-- MATERNOS / PARTO / UBICACIÓN -->
+            <div class="grid lg:grid-cols-3 gap-5">
+                <section class="card rounded-2xl p-5 lg:col-span-2">
+                    <h2 class="font-semibold text-violet-400 mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-5 bg-violet-500 rounded-full"></span> Datos Maternos
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-2">
+                            <label>Nombre madre</label>
+                            <input id="nombreMadre" class="input w-full rounded-lg px-3 py-2 mt-1">
+                        </div>
+                        <div>
+                            <label>Edad</label>
+                            <input id="edadMadre" type="number" class="input w-full rounded-lg px-3 py-2 mt-1">
+                        </div>
+                        <div>
+                            <label>G P C A</label>
+                            <div class="grid grid-cols-4 gap-1 mt-1">
+                                <input id="g" placeholder="G" class="input rounded-lg px-2 py-2 text-center">
+                                <input id="p" placeholder="P" class="input rounded-lg px-2 py-2 text-center">
+                                <input id="c" placeholder="C" class="input rounded-lg px-2 py-2 text-center">
+                                <input id="a" placeholder="A" class="input rounded-lg px-2 py-2 text-center">
+                            </div>
+                        </div>
+                        <div>
+                            <label>Tipo Rh</label>
+                            <input id="tipoRhMadre" class="input w-full rounded-lg px-3 py-2 mt-1">
+                        </div>
+                        <div>
+                            <label>VIH</label>
+                            <select id="vih" class="input w-full rounded-lg px-3 py-2 mt-1"><option></option><option>Negativo</option><option>Positivo</option></select>
+                        </div>
+                        <div>
+                            <label>RPR</label>
+                            <select id="rpr" class="input w-full rounded-lg px-3 py-2 mt-1"><option></option><option>NR</option><option>Reactivo</option></select>
+                        </div>
+                        <div>
+                            <label>Hb</label>
+                            <input id="hbMadre" class="input w-full rounded-lg px-3 py-2 mt-1">
+                        </div>
+                        <div class="md:col-span-4 grid md:grid-cols-2 gap-4 pt-2 border-t border-[#262626]">
+                            <div>
+                                <label>Tipo Parto</label>
+                                <select id="partoTipo" class="input w-full rounded-lg px-3 py-2 mt-1"><option></option><option>Vaginal</option><option>Cesárea</option><option>Distócico</option></select>
+                            </div>
+                            <div>
+                                <label>Observaciones Parto</label>
+                                <input id="partoObs" class="input w-full rounded-lg px-3 py-2 mt-1">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card rounded-2xl p-5">
+                    <h2 class="font-semibold text-emerald-400 mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-5 bg-emerald-500 rounded-full"></span> Ubicación
+                    </h2>
+                    <div class="space-y-3">
+                        <div>
+                            <label>Sala</label>
+                            <select id="sala" class="input w-full rounded-lg px-3 py-2 mt-1">
+                                <option value="">Seleccione</option>
+                                <option>Emergencia Pediátrica</option>
+                                <option>UCIN</option>
+                                <option>Transición</option>
+                                <option>Puerperio</option>
+                                <option>Neo Mínimos</option>
+                                <option>Neo Intermedios</option>
+                                <option>Neo Graves</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Cama</label>
+                            <input id="cama" class="input w-full rounded-lg px-3 py-2 mt-1">
+                        </div>
+                        <div>
+                            <label>Dirección</label>
+                            <input id="direccion" class="input w-full rounded-lg px-3 py-2 mt-1">
+                        </div>
+                        <div>
+                            <label>Teléfono</label>
+                            <input id="telefono" class="input w-full rounded-lg px-3 py-2 mt-1">
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- LABORATORIOS + CIE -->
+            <div class="grid lg:grid-cols-2 gap-5">
+                <section class="card rounded-2xl p-5">
+                    <h2 class="font-semibold text-amber-400 mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-5 bg-amber-500 rounded-full"></span> Laboratorios RN
+                    </h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div><label>Tipo Rh RN</label><input id="rhRN" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                        <div><label>Bili Total</label><input id="biliTotal" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                        <div><label>Bili Directa</label><input id="biliDirecta" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                        <div><label>Bili Transcutánea</label><input id="biliTrans" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                        <div><label>Glucometría</label><input id="glucometria" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                        <div><label>Hb</label><input id="hbRN" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                        <div><label>Hto</label><input id="htoRN" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label>Tamizaje Cardíaco</label>
+                            <div class="flex gap-2 mt-1">
+                                <input id="tamizPre" type="number" placeholder="Pre" class="input w-full rounded-lg px-2 py-2 text-center">
+                                <input id="tamizPost" type="number" placeholder="Post" class="input w-full rounded-lg px-2 py-2 text-center">
+                            </div>
+                            <div id="tamizResultado" class="text-xs mt-2 h-5"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card rounded-2xl p-5">
+                    <h2 class="font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-5 bg-cyan-500 rounded-full"></span> CIE-11
+                    </h2>
+                    <div id="cie-container" class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[180px] overflow-y-auto pr-2">
+                        <!-- 10 selects generated by JS -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- INTERCONSULTAS + ESTUDIOS -->
+            <div class="grid lg:grid-cols-2 gap-5">
+                <section class="card rounded-2xl p-5">
+                    <h2 class="font-semibold text-pink-400 mb-3">Interconsultas</h2>
+                    <div id="interconsultas-chips" class="flex flex-wrap gap-2 mb-3"></div>
+                    <div id="interconsultas-lista" class="space-y-2 max-h-[200px] overflow-y-auto"></div>
+                </section>
+
+                <section class="card rounded-2xl p-5">
+                    <h2 class="font-semibold text-indigo-400 mb-3">Estudios</h2>
+                    <div class="space-y-2 text-sm">
+                        <div class="grid grid-cols-12 gap-2 items-center">
+                            <span class="col-span-4 text-gray-400">Rx Tórax</span>
+                            <input id="rxFecha" type="date" class="col-span-3 input rounded-lg px-2 py-1.5">
+                            <input id="rxHallazgo" placeholder="Hallazgos" class="col-span-5 input rounded-lg px-2 py-1.5">
+                        </div>
+                        <div class="grid grid-cols-12 gap-2 items-center">
+                            <span class="col-span-4 text-gray-400">Ecocardiograma</span>
+                            <input id="ecoFecha" type="date" class="col-span-3 input rounded-lg px-2 py-1.5">
+                            <input id="ecoHallazgo" placeholder="Hallazgos" class="col-span-5 input rounded-lg px-2 py-1.5">
+                        </div>
+                        <div class="grid grid-cols-12 gap-2 items-center">
+                            <span class="col-span-4 text-gray-400">USG Transfontanelar</span>
+                            <input id="usgTfFecha" type="date" class="col-span-3 input rounded-lg px-2 py-1.5">
+                            <input id="usgTfHallazgo" placeholder="Hallazgos" class="col-span-5 input rounded-lg px-2 py-1.5">
+                        </div>
+                        <div class="grid grid-cols-12 gap-2 items-center">
+                            <span class="col-span-4 text-gray-400">USG Abdominal</span>
+                            <input id="usgAbFecha" type="date" class="col-span-3 input rounded-lg px-2 py-1.5">
+                            <input id="usgAbHallazgo" placeholder="Hallazgos" class="col-span-5 input rounded-lg px-2 py-1.5">
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- NUEVO: SEGUIMIENTO -->
+            <section class="card rounded-2xl p-5 border-blue-900/50">
+                <h2 class="font-bold text-xl text-blue-400 mb-5 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    SEGUIMIENTO Y EVOLUCIÓN
+                </h2>
+                
+                <!-- SEGUIMIENTO DIARIO -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-gray-300">SEGUIMIENTO DIARIO</h3>
+                        <button type="button" id="btn-add-dia" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium">+ Agregar día</button>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-[#2d2d2d]">
+                        <table class="w-full text-sm">
+                            <thead class="bg-[#0f0f0f] text-[11px] uppercase text-gray-400">
+                                <tr>
+                                    <th class="p-2 text-left w-[110px]">Fecha</th>
+                                    <th class="p-2 text-left w-[90px]">Peso</th>
+                                    <th class="p-2 text-left w-[120px]">Alimentación</th>
+                                    <th class="p-2 text-left w-[90px]">Diuresis</th>
+                                    <th class="p-2 text-left w-[100px]">Deposiciones</th>
+                                    <th class="p-2 text-left">Exámenes pendientes</th>
+                                    <th class="p-2 text-left">Plan</th>
+                                    <th class="w-8"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="seg-diario-body" class="divide-y divide-[#1f1f1f]"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ACTUALIZACIÓN EXÁMENES -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-gray-300">ACTUALIZACIÓN DE EXÁMENES</h3>
+                        <button type="button" id="btn-add-examen" class="px-3 py-1.5 bg-[#252525] hover:bg-[#2f2f2f] rounded-lg text-sm border border-[#333]">+ Agregar examen</button>
+                    </div>
+                    <div id="act-examenes-list" class="space-y-2"></div>
+                </div>
+
+                <!-- CONDICIÓN EGRESO -->
+                <div>
+                    <h3 class="font-semibold text-gray-300 mb-3">CONDICIÓN AL EGRESO</h3>
+                    <div class="flex flex-wrap gap-4 mb-4">
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="egresoTipo" value="alta" class="accent-blue-500"> <span>Alta Médica</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="egresoTipo" value="traslado" class="accent-amber-500"> <span>Traslado</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="egresoTipo" value="fallecido" class="accent-red-500"> <span>Fallecido</span></label>
+                    </div>
+
+                    <div id="egreso-alta" class="hidden p-4 rounded-xl bg-[#0f0f0f] border border-[#262626]">
+                        <div class="grid md:grid-cols-3 gap-3">
+                            <div><label>Fecha alta</label><input id="fechaAlta" type="date" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                            <div><label>Peso egreso</label><input id="pesoEgreso" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                            <div><label>Alimentación egreso</label><select id="alimentacionEgreso" class="input w-full rounded-lg px-3 py-2 mt-1"><option></option><option>LM</option><option>Fórmula</option><option>Mixta</option></select></div>
+                            <div class="md:col-span-3"><label>Citas control</label><input id="citasControl" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                            <div class="md:col-span-3"><label>Indicaciones</label><textarea id="indicaciones" rows="2" class="input w-full rounded-lg px-3 py-2 mt-1"></textarea></div>
+                        </div>
+                    </div>
+
+                    <div id="egreso-traslado" class="hidden p-4 rounded-xl bg-[#0f0f0f] border border-[#262626]">
+                        <div class="grid md:grid-cols-3 gap-3">
+                            <div><label>Fecha</label><input id="fechaTraslado" type="date" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                            <div><label>Servicio destino</label><input id="servicioDestino" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                            <div><label>Motivo</label><input id="motivoTraslado" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                        </div>
+                    </div>
+
+                    <div id="egreso-fallecido" class="hidden p-4 rounded-xl bg-[#0f0f0f] border border-red-900/50">
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <div><label>Fecha</label><input id="fechaFallecido" type="date" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                            <div><label>Hora</label><input id="horaFallecido" type="time" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                            <div><label>Causa básica</label><input id="causaBasica" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                            <div><label>Causa directa</label><input id="causaDirecta" class="input w-full rounded-lg px-3 py-2 mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BOTÓN GUARDAR -->
+            <div class="flex justify-end pt-2">
+                <button type="button" id="btnGuardar" class="px-8 py-3.5 rounded-2xl font-semibold bg-gray-700 text-gray-300 hover:bg-gray-600 transition-all shadow-lg shadow-black/20">
+                    Guardar
+                </button>
+            </div>
+        </form>
+
+        <!-- RESUMEN -->
+        <section class="card rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-semibold text-gray-300">Resumen de Pacientes</h2>
+                <button id="btn-email" class="px-4 py-2 bg-[#1f1f1f] hover:bg-[#2a2a2a] rounded-xl text-sm border border-[#2d2d2d]">Enviar por Correo</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="text-[11px] uppercase text-gray-500 border-b border-[#262626]">
+                        <tr><th class="text-left p-2">Nombre RN</th><th class="text-left p-2">Expediente</th><th class="text-left p-2">Sala</th><th class="text-left p-2">Cama</th><th class="text-left p-2">Diagnóstico</th><th class="text-left p-2">Fecha</th></tr>
+                    </thead>
+                    <tbody id="resumen-body" class="divide-y divide-[#1a1a1a]"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+<script>
+const $ = id => document.getElementById(id);
+const scriptURL = 'https://script.google.com/macros/s/AKfycby0fh_4SyW-cse9G8GcW4895LsryXZAIUkqnxMQ2m4BSct1idg-2dRVSuDTI9FDKzC0/exec';
+
+// CIE options
+const cieOptions = [
+    '', 'KA21.0 Ictericia','KA20.0 Prematuridad','KA40.0 Sepsis','KA23.0 SDR','KA24.0 TTRN',
+    'KA25.0 Asfixia','KA41.0 NEC','KA42.0 HIV','KA43.0 DBP','KA45.0 PCA','KB20.0 ABO',
+    'KB21.0 Rh','KA26.0 SAM','KA27.0 Hipoglicemia','KA28.0 Policitemia'
+];
+const cieContainer = $('cie-container');
+for(let i=1;i<=10;i++){
+    const sel = document.createElement('select');
+    sel.id = 'cie'+i; sel.className = 'input w-full rounded-lg px-2 py-2 text-sm';
+    cieOptions.forEach(op=>{ const o=document.createElement('option'); o.value=op; o.textContent=op||'-- Seleccione --'; sel.appendChild(o); });
+    const wrap = document.createElement('div'); wrap.innerHTML = `<label class="text-[10px]">Dx ${i}</label>`; wrap.appendChild(sel); wrap.className='mt-1';
+    cieContainer.appendChild(wrap);
+}
+
+// Interconsultas
+const chips = ['Cardiología','Neurología','Infectología','Cirugía Pediátrica','Oftalmología','Genética','Nefrología','Endocrinología'];
+const chipsCont = $('interconsultas-chips');
+chips.forEach(name=>{
+    const b = document.createElement('button'); b.type='button'; b.textContent=name;
+    b.className='chip px-3 py-1.5 rounded-full text-xs border border-[#333] bg-[#0f0f0f] hover:bg-[#1f1f1f]';
+    b.onclick=()=>{
+        if(document.querySelector(`[data-esp="${name}"]`)) return;
+        b.classList.add('active');
+        const div = document.createElement('div'); div.className='interconsulta-item p-3 rounded-xl bg-[#0f0f0f] border border-[#262626]'; div.dataset.esp=name;
+        div.innerHTML = `<div class="flex justify-between items-center mb-2"><span class="text-sm font-medium text-blue-400">${name}</span><button type="button" class="text-gray-500 hover:text-red-400" onclick="this.closest('.interconsulta-item').remove(); document.querySelector('.chip.active');">✕</button></div><textarea placeholder="Qué dijo el Dr." rows="2" class="input w-full rounded-lg px-3 py-2 text-sm"></textarea>`;
+        $('interconsultas-lista').appendChild(div);
+    };
+    chipsCont.appendChild(b);
+});
+
+// Tamizaje
+function calcularTamizaje(){
+    const pre = parseFloat($('tamizPre').value), post = parseFloat($('tamizPost').value);
+    const res = $('tamizResultado');
+    if(isNaN(pre)||isNaN(post)){ res.innerHTML=''; return; }
+    const diff = Math.abs(pre-post);
+    if(diff<3 && pre>95 && post>95){
+        res.innerHTML = '<span class="text-green-400 font-medium">🟢 Tamizaje Negativo</span>';
+    } else {
+        res.innerHTML = '<span class="text-red-400 font-medium">🔴 Tamizaje Positivo - Derivar a Cardio</span>';
+    }
+}
+$('tamizPre').addEventListener('input', calcularTamizaje);
+$('tamizPost').addEventListener('input', calcularTamizaje);
+
+// Sexo button
+const btnGuardar = $('btnGuardar');
+$('sexo').addEventListener('change', e=>{
+    if(e.target.value==='Hombre'){
+        btnGuardar.className = 'px-8 py-3.5 rounded-2xl font-semibold transition-all shadow-lg shadow-blue-900/30 bg-[#3B82F6] hover:bg-blue-500 text-white';
+        btnGuardar.innerHTML = '👦 Guardar';
+    } else if(e.target.value==='Mujer'){
+        btnGuardar.className = 'px-8 py-3.5 rounded-2xl font-semibold transition-all shadow-lg shadow-pink-900/30 bg-[#EC4899] hover:bg-pink-500 text-white';
+        btnGuardar.innerHTML = '👧 Guardar';
+    } else {
+        btnGuardar.className = 'px-8 py-3.5 rounded-2xl font-semibold bg-gray-700 text-gray-300';
+        btnGuardar.innerHTML = 'Guardar';
+    }
+});
+
+// Seguimiento diario
+function addDia(data={}){
+    const tr = document.createElement('tr'); tr.className='hover:bg-[#111]';
+    const today = new Date().toISOString().split('T')[0];
+    tr.innerHTML = `
+        <td class="p-1"><input type="date" value="${data.fecha||today}" class="input w-full rounded px-2 py-1.5 text-xs"></td>
+        <td class="p-1"><input type="number" step="0.01" value="${data.peso||''}" placeholder="g" class="input w-full rounded px-2 py-1.5 text-xs"></td>
+        <td class="p-1"><select class="input w-full rounded px-2 py-1.5 text-xs"><option></option><option${data.alim==='LM'?' selected':''}>LM</option><option${data.alim==='Fórmula'?' selected':''}>Fórmula</option><option${data.alim==='Mixta'?' selected':''}>Mixta</option><option${data.alim==='NPO'?' selected':''}>NPO</option></select></td>
+        <td class="p-1"><input value="${data.diuresis||''}" class="input w-full rounded px-2 py-1.5 text-xs"></td>
+        <td class="p-1"><input value="${data.depo||''}" class="input w-full rounded px-2 py-1.5 text-xs"></td>
+        <td class="p-1"><input value="${data.exam||''}" class="input w-full rounded px-2 py-1.5 text-xs"></td>
+        <td class="p-1"><input value="${data.plan||''}" class="input w-full rounded px-2 py-1.5 text-xs"></td>
+        <td class="p-1 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-gray-600 hover:text-red-400">✕</button></td>
+    `;
+    $('seg-diario-body').appendChild(tr);
+}
+$('btn-add-dia').onclick = ()=>addDia();
+
+// Actualización exámenes
+function addExamen(data={}){
+    const div = document.createElement('div'); div.className='grid grid-cols-12 gap-2 items-center';
+    div.innerHTML = `
+        <input type="date" value="${data.fecha||''}" class="col-span-2 input rounded-lg px-2 py-1.5 text-sm">
+        <select class="col-span-2 input rounded-lg px-2 py-1.5 text-sm"><option></option>${['Bili','Hemograma','PCR','Hemocultivo','Rx','Eco','Otro'].map(o=>`<option${data.examen===o?' selected':''}>${o}</option>`).join('')}</select>
+        <input placeholder="Resultado" value="${data.res||''}" class="col-span-4 input rounded-lg px-2 py-1.5 text-sm">
+        <input placeholder="Conducta" value="${data.conducta||''}" class="col-span-3 input rounded-lg px-2 py-1.5 text-sm">
+        <button type="button" onclick="this.parentElement.remove()" class="col-span-1 text-gray-600 hover:text-red-400">✕</button>
+    `;
+    $('act-examenes-list').appendChild(div);
+}
+$('btn-add-examen').onclick = ()=>addExamen();
+
+// Egreso
+document.querySelectorAll('input[name="egresoTipo"]').forEach(r=>{
+    r.addEventListener('change', ()=>{
+        $('egreso-alta').classList.toggle('hidden', r.value!=='alta');
+        $('egreso-traslado').classList.toggle('hidden', r.value!=='traslado');
+        $('egreso-fallecido').classList.toggle('hidden', r.value!=='fallecido');
+    });
+});
+
+// Guardar
+btnGuardar.onclick = async ()=>{
+    const get = id => $(id)?.value || '';
+    const data = {
+        nombreRN: get('nombreRN'), expediente: get('expediente'), sexo: get('sexo'), fechaNac: get('fechaNac'), horaNac: get('horaNac'),
+        peso: get('peso'), talla: get('talla'), pc: get('pc'), eg: get('eg'), apgar1: get('apgar1'), apgar5: get('apgar5'),
+        nombreMadre: get('nombreMadre'), edadMadre: get('edadMadre'), g:get('g'), p:get('p'), c:get('c'), a:get('a'),
+        tipoRhMadre: get('tipoRhMadre'), vih: get('vih'), rpr: get('rpr'), hbMadre: get('hbMadre'),
+        partoTipo: get('partoTipo'), partoObs: get('partoObs'),
+        sala: get('sala'), cama: get('cama'), direccion: get('direccion'), telefono: get('telefono'),
+        rhRN: get('rhRN'), biliTotal: get('biliTotal'), biliDirecta: get('biliDirecta'), biliTrans: get('biliTrans'),
+        glucometria: get('glucometria'), hbRN: get('hbRN'), htoRN: get('htoRN'),
+        tamizPre: get('tamizPre'), tamizPost: get('tamizPost'), tamizResultado: $('tamizResultado').textContent,
+        cie11: Array.from({length:10},(_,i)=>get('cie'+(i+1))).filter(Boolean),
+        interconsultas: Array.from(document.querySelectorAll('.interconsulta-item')).map(el=>({especialidad: el.dataset.esp, nota: el.querySelector('textarea').value})),
+        estudios: {rx:{fecha:get('rxFecha'),hallazgo:get('rxHallazgo')}, eco:{fecha:get('ecoFecha'),hallazgo:get('ecoHallazgo')}, usgTf:{fecha:get('usgTfFecha'),hallazgo:get('usgTfHallazgo')}, usgAb:{fecha:get('usgAbFecha'),hallazgo:get('usgAbHallazgo')}},
+        seguimientoDiario: Array.from($('seg-diario-body').querySelectorAll('tr')).map(tr=>{const i=tr.querySelectorAll('input,select'); return {fecha:i[0].value,peso:i[1].value,alim:i[2].value,diuresis:i[3].value,depo:i[4].value,exam:i[5].value,plan:i[6].value}}),
+        actualizacionExamenes: Array.from($('act-examenes-list').children).map(d=>{const i=d.querySelectorAll('input,select'); return {fecha:i[0].value,examen:i[1].value,res:i[2].value,conducta:i[3].value}}),
+        egresoTipo: document.querySelector('input[name="egresoTipo"]:checked')?.value || '',
+        egreso: {fechaAlta:get('fechaAlta'),pesoEgreso:get('pesoEgreso'),alimentacionEgreso:get('alimentacionEgreso'),citasControl:get('citasControl'),indicaciones:get('indicaciones'),fechaTraslado:get('fechaTraslado'),servicioDestino:get('servicioDestino'),motivoTraslado:get('motivoTraslado'),fechaFallecido:get('fechaFallecido'),horaFallecido:get('horaFallecido'),causaBasica:get('causaBasica'),causaDirecta:get('causaDirecta')}
+    };
+
+    try{
+        await fetch(scriptURL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+    }catch(e){ console.log('Offline save'); }
+
+    // Guardar local
+    const pacientes = JSON.parse(localStorage.getItem('sebasPacientes')||'[]');
+    pacientes.unshift({...data, timestamp: new Date().toISOString()});
+    localStorage.setItem('sebasPacientes', JSON.stringify(pacientes.slice(0,50)));
+    updateResumen();
+
+    alert('ya soy tu amiguito Sebastian!');
+    
+    // Limpiar
+    $('form-sebas').reset();
+    $('seg-diario-body').innerHTML=''; $('act-examenes-list').innerHTML=''; $('interconsultas-lista').innerHTML='';
+    $('tamizResultado').innerHTML=''; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    $('egreso-alta').classList.add('hidden'); $('egreso-traslado').classList.add('hidden'); $('egreso-fallecido').classList.add('hidden');
+    btnGuardar.className = 'px-8 py-3.5 rounded-2xl font-semibold bg-gray-700 text-gray-300'; btnGuardar.innerHTML='Guardar';
+    window.scrollTo({top:0, behavior:'smooth'});
+};
+
+// Resumen
+function updateResumen(){
+    const tbody = $('resumen-body'); tbody.innerHTML='';
+    const pacientes = JSON.parse(localStorage.getItem('sebasPacientes')||'[]');
+    pacientes.slice(0,10).forEach(p=>{
+        const tr = document.createElement('tr'); tr.className='hover:bg-[#111] cursor-pointer';
+        tr.innerHTML = `<td class="p-2">${p.nombreRN||''}</td><td class="p-2 text-gray-400">${p.expediente||''}</td><td class="p-2">${p.sala||''}</td><td class="p-2">${p.cama||''}</td><td class="p-2 text-xs">${(p.cie11||[])[0]||''}</td><td class="p-2 text-gray-500">${p.fechaNac||''}</td>`;
+        tr.onclick = ()=>populateForm(p);
+        tbody.appendChild(tr);
+    });
+}
+
+// Buscar y poblar
+function populateForm(p){
+    Object.keys(p).forEach(k=>{ const el=$(k); if(el) el.value=p[k]; });
+    // CIE
+    (p.cie11||[]).forEach((v,i)=>{ const el=$('cie'+(i+1)); if(el) el.value=v; });
+    // Tamizaje
+    $('tamizPre').value=p.tamizPre||''; $('tamizPost').value=p.tamizPost||''; calcularTamizaje();
+    // Interconsultas
+    $('interconsultas-lista').innerHTML=''; (p.interconsultas||[]).forEach(ic=>{ chipsCont.querySelector(`button`).click(); /*simplified*/ });
+    // Estudios
+    if(p.estudios){ $('rxFecha').value=p.estudios.rx?.fecha||''; $('rxHallazgo').value=p.estudios.rx?.hallazgo||''; $('ecoFecha').value=p.estudios.eco?.fecha||''; $('ecoHallazgo').value=p.estudios.eco?.hallazgo||''; $('usgTfFecha').value=p.estudios.usgTf?.fecha||''; $('usgTfHallazgo').value=p.estudios.usgTf?.hallazgo||''; $('usgAbFecha').value=p.estudios.usgAb?.fecha||''; $('usgAbHallazgo').value=p.estudios.usgAb?.hallazgo||''; }
+    // Seguimiento
+    $('seg-diario-body').innerHTML=''; (p.seguimientoDiario||[]).forEach(addDia);
+    $('act-examenes-list').innerHTML=''; (p.actualizacionExamenes||[]).forEach(addExamen);
+    // Egreso
+    if(p.egresoTipo){ document.querySelector(`input[name="egresoTipo"][value="${p.egresoTipo}"]`)?.click(); Object.keys(p.egreso||{}).forEach(k=>{ const el=$(k); if(el) el.value=p.egreso[k]; }); }
+    // Sexo button
+    $('sexo').dispatchEvent(new Event('change'));
+    window.scrollTo({top:0, behavior:'smooth'});
+}
+
+$('btn-buscar').onclick = ()=>{
+    const q = $('input-busqueda').value.toLowerCase().trim(); if(!q) return;
+    const pacientes = JSON.parse(localStorage.getItem('sebasPacientes')||'[]');
+    const p = pacientes.find(pat => 
+        (pat.nombreRN||'').toLowerCase().includes(q) ||
+        (pat.expediente||'').toLowerCase().includes(q) ||
+        (pat.sala||'').toLowerCase().includes(q) ||
+        (pat.cama||'').toLowerCase().includes(q) ||
+        (pat.cie11||[]).join(' ').toLowerCase().includes(q)
+    );
+    if(p) populateForm(p); else alert('Paciente no encontrado');
+};
+$('input-busqueda').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('btn-buscar').click(); } });
+
+// Email
+$('btn-email').onclick = ()=>{
+    const pacientes = JSON.parse(localStorage.getItem('sebasPacientes')||'[]').slice(0,5);
+    const body = pacientes.map(p=>`${p.nombreRN} (${p.expediente}) - ${p.sala}/${p.cama} - ${(p.cie11||[])[0]||''}`).join('%0D%0A');
+    window.location.href = `mailto:?subject=Resumen SEBAS v8.4&body=${body}`;
+};
+
+// Init
+addDia(); addExamen(); updateResumen();
+</script>
+</body>
+</html>
