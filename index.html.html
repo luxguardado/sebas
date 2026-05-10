@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es-HN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEBAS v9.0 HMCR - Registro Neonatal</title>
+<style>
+:root{
+  --bg:#0a0a0a; --card:#1a1a1a; --card-2:#141414; --border:#262626;
+  --blue:#3B82F6; --pink:#EC4899; --text:#e4e4e7; --muted:#a1a1aa;
+  --green:#22c55e; --red:#ef4444; --amber:#f59e0b;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing:antialiased; line-height:1.45;
+}
+header{
+  position:sticky; top:0; z-index:40;
+  background:rgba(10,10,10,.85); backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.header-inner{
+  max-width:1400px; margin:0 auto; padding:14px 16px;
+  display:flex; gap:16px; align-items:center;
+}
+.logo{
+  display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.3px;
+  font-size:20px; white-space:nowrap;
+}
+.logo .pulse{
+  width:32px; height:32px; display:grid; place-items:center;
+  background:radial-gradient(60% 60% at 50% 40%, #1e3a8a 0%, #0b1220 100%);
+  border:1px solid #1f3b7a; border-radius:10px; color:#93c5fd; box-shadow:0 0 24px rgba(59,130,246,.25) inset;
+}
+.logo em{font-style:normal; color:var(--muted); font-weight:600; font-size:13px; margin-left:4px}
+.search-wrap{position:relative; flex:1; display:flex; gap:8px}
+.search-wrap input{
+  flex:1; background:#0f0f0f; border:1px solid var(--border); color:var(--text);
+  padding:12px 14px; border-radius:12px; outline:none; font-size:15px;
+}
+.search-wrap input:focus{border-color:var(--blue); box-shadow:0 0 0 3px rgba(59,130,246,.2)}
+.search-wrap button{
+  background:var(--blue); color:white; border:none; padding:0 18px; border-radius:12px;
+  font-weight:700; cursor:pointer; transition:.2s; white-space:nowrap;
+}
+.search-wrap button:hover{filter:brightness(1.1)}
+.results-dropdown{
+  position:absolute; top:110%; left:0; right:0; background:var(--card);
+  border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.5);
+  max-height:320px; overflow:auto; display:none;
+}
+.results-dropdown.show{display:block}
+.result-item{
+  padding:12px 14px; border-bottom:1px solid #222; cursor:pointer; display:flex; justify-content:space-between; gap:10px;
+}
+.result-item:hover{background:#222}
+.result-item:last-child{border-bottom:none}
+.result-item small{color:var(--muted)}
+
+.container{max-width:1400px; margin:22px auto; padding:0 16px 80px}
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+@media (max-width:980px){.form-grid{grid-template-columns:1fr} .header-inner{flex-direction:column; align-items:stretch}}
+
+.card{
+  background:linear-gradient(180deg, var(--card), var(--card-2));
+  border:1px solid var(--border); border-radius:18px; padding:18px;
+  box-shadow:0 1px 0 rgba(255,255,255,.02) inset, 0 8px 24px rgba(0,0,0,.35);
+}
+.card h3{
+  margin:0 0 14px; font-size:13px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted);
+  display:flex; align-items:center; gap:8px
+}
+label{display:block; font-size:12px; color:#c9c9d1; margin:10px 0 6px}
+input, select, textarea{
+  width:100%; background:#0f0f0f; border:1px solid #2a2a2e; color:var(--text);
+  padding:10px 12px; border-radius:10px; font-size:14px; outline:none; transition:.15s;
+}
+input:focus, select:focus, textarea:focus{border-color:var(--blue); box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+input::placeholder, textarea::placeholder{color:#6b7280}
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
+.grid-4{display:grid; grid-template-columns:repeat(4,1fr); gap:8px}
+.muted{color:var(--muted); font-size:12px}
+
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{
+  padding:8px 12px; border-radius:999px; background:#23232a; border:1px solid #2e2e36;
+  cursor:pointer; font-size:13px; user-select:none; transition:.15s;
+}
+.chip:hover{border-color:var(--blue); background:#1e293b}
+.interconsulta-item{
+  background:#0f0f0f; border:1px solid #2a2a2e; border-radius:12px; padding:12px; margin-top:10px;
+}
+.interconsulta-item label{margin-top:0}
+.interconsulta-item button{
+  margin-top:8px; background:#27272a; border:1px solid #3a3a42; color:#ddd; padding:6px 10px; border-radius:8px; cursor:pointer; font-size:12px
+}
+.interconsulta-item button:hover{background:#3a3a44}
+
+.table-wrap{overflow:auto; border:1px solid var(--border); border-radius:14px}
+table{width:100%; border-collapse:separate; border-spacing:0; min-width:720px}
+th, td{padding:10px 10px; border-bottom:1px solid #222; text-align:left; font-size:14px}
+th{background:#121214; color:#c7c7cf; position:sticky; top:0; z-index:1}
+tr:last-child td{border-bottom:none}
+.table-compact td input, .table-compact td select{padding:8px 8px; font-size:13px; background:#0b0b0c}
+
+.tamizaje-grid{display:grid; grid-template-columns:1fr 1fr auto; gap:12px; align-items:end}
+.tam-result{
+  padding:12px 14px; border-radius:12px; background:#0f0f0f; border:1px dashed #2a2a2e; text-align:center; font-weight:700; min-height:46px; display:grid; place-items:center
+}
+.tam-result.neg{background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.35); color:#86efac}
+.tam-result.pos{background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.35); color:#fca5a5}
+
+.card-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px}
+.btn{border:1px solid #2e2e36; background:#1c1c22; color:#e5e7eb; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600; font-size:13px}
+.btn:hover{background:#252532}
+.btn-sm{padding:6px 10px; font-size:12px}
+.btn-del{background:#2a1212; border-color:#3b1a1a; color:#fca5a5}
+.btn-del:hover{background:#3b1a1a}
+
+.egreso-options{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:12px}
+.egreso-options label{display:flex; align-items:center; gap:8px; margin:0; cursor:pointer; font-size:14px; color:#d4d4d8}
+.egreso-panel{display:none; background:#0f0f0f; border:1px solid #26262b; border-radius:12px; padding:12px; margin-top:8px}
+
+.btn-guardar{
+  width:100%; margin-top:18px; padding:16px 18px; border:none; border-radius:16px;
+  background:#52525b; color:white; font-size:16px; font-weight:800; letter-spacing:.3px;
+  cursor:pointer; transition:.2s; display:flex; align-items:center; justify-content:center; gap:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4), 0 0 rgba(59,130,246,.4);
+}
+.btn-guardar:hover{filter:brightness(1.05); transform:translateY(-1px)}
+.btn-guardar:disabled{opacity:.7; cursor:not-allowed; transform:none}
+.spinner{
+  width:18px; height:18px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff;
+  border-radius:50%; animation:spin 1s linear infinite; display:inline-block
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.section-title{margin:28px 0 12px; font-size:18px; font-weight:800; display:flex; align-items:center; gap:10px}
+.badge{font-size:11px; padding:4px 8px; border-radius:999px; background:#1e293b; border:1px solid #334155; color:#93c5fd}
+footer{color:#71717a; text-align:center; padding:30px 0; font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="logo"><span class="pulse">✚</span> SEBAS <em>v9.0 HMCR</em></div>
+    <div class="search-wrap">
+      <input id="search" autocomplete="off" placeholder="Buscar: Nombre / Expediente / Dx / Cama / Sala">
+      <button id="btnBuscar">Buscar</button>
+      <div id="search_results" class="results-dropdown"></div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <form id="formRN" onsubmit="return false">
+    <div class="form-grid">
+      <!-- LEFT -->
+      <div style="display:flex; flex-direction:column; gap:18px">
+        <section class="card">
+          <h3>👶 Identificación</h3>
+          <div class="grid-2">
+            <div><label>Nombre RN</label><input id="ident_nombre" placeholder="Apellidos, Nombres"></div>
+            <div><label>Expediente</label><input id="ident_expediente" placeholder="Ej. 2024-12345"></div>
+          </div>
+          <div class="grid-3">
+            <div><label>Sexo</label>
+              <select id="ident_sexo">
+                <option value="">—</option><option>Hombre</option><option>Mujer</option>
+              </select>
+            </div>
+            <div><label>Fecha Nac</label><input id="ident_fecha_nac" type="date"></div>
+            <div><label>Hora</label><input id="ident_hora" type="time"></div>
+          </div>
+          <div class="grid-4">
+            <div><label>Peso g</label><input id="ident_peso" type="number" placeholder="3200"></div>
+            <div><label>Talla cm</label><input id="ident_talla" type="number" step="0.1"></div>
+            <div><label>PC cm</label><input id="ident_pc" type="number" step="0.1"></div>
+            <div><label>EG sem</label><input id="ident_eg" type="number" step="0.1" placeholder="38.5"></div>
+          </div>
+          <div class="grid-2">
+            <div><label>Apgar 1'</label><input id="ident_apgar1" type="number" min="0" max="10"></div>
+            <div><label>Apgar 5'</label><input id="ident_apgar5" type="number" min="0" max="10"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3>🤱 Datos Maternos</h3>
+          <div class="grid-2">
+            <div><label>Nombre madre</label><input id="mat_nombre" placeholder="Nombre completo"></div>
+            <div><label>Edad</label><input id="mat_edad" type="number" min="12" max="55"></div>
+          </div>
+          <label>G P C A</label>
+          <div class="grid-4">
+            <input id="mat_g" placeholder="G" type="number">
+            <input id="mat_p" placeholder="P" type="number">
+            <input id="mat_c" placeholder="C" type="number">
+            <input id="mat_a" placeholder="A" type="number">
+          </div>
+          <div class="grid-3" style="margin-top:10px">
+            <div><label>TipoRh</label>
+              <select id="mat_rh"><option value="">—</option><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select>
+            </div>
+            <div><label>VIH</label><select id="mat_vih"><option value="">—</option><option>Negativo</option><option>Positivo</option><option>Desconocido</option></select></div>
+            <div><label>RPR</label><select id="mat_rpr"><option value="">—</option><option>NR</option><option>Reactivo</option></select></div>
+          </div>
+          <div class="grid-2">
+            <div><label>Hb</label><input id="mat_hb" placeholder="g/dL"></div>
+            <div><label>Hto</label><input id="mat_hto" placeholder="%"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3>📍 Ubicación HMCR</h3>
+          <div class="grid-2">
+            <div><label>Sala</label>
+              <select id="ubi_sala">
+                <option value="">— Seleccionar —</option>
+                <option>Emergencia Pediátrica</option>
+                <option>UCIN</option>
+                <option>Transición</option>
+                <option>Puerperio</option>
+                <option>Neo Mínimos</option>
+                <option>Neo Intermedios</option>
+                <option>Neo Graves</option>
+              </select>
+            </div>
+            <div><label>Cama</label><input id="ubi_cama" placeholder="Ej. 3A"></div>
+          </div>
+          <div><label>Dirección</label><input id="ubi_direccion" placeholder="Colonia, municipio"></div>
+          <div><label>Teléfono</label><input id="ubi_telefono" placeholder="9999-9999"></div>
+        </section>
+      </div>
+
+      <!-- RIGHT -->
+      <div style="display:flex; flex-direction:column; gap:18px">
+        <section class="card">
+          <h3>🧪 Laboratorios</h3>
+          <div class="grid-3">
+            <div><label>RN TipoRh</label><select id="lab_rh"><option value="">—</option><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select></div>
+            <div><label>RPR RN</label><select id="lab_rpr"><option value="">—</option><option>NR</option><option>Reactivo</option></select></div>
+            <div><label>Gluco</label><input id="lab_gluco" placeholder="mg/dL"></div>
+          </div>
+          <div class="grid-2">
+            <div><label>Hb</label><input id="lab_hb"></div>
+            <div><label>Hto</label><input id="lab_hto"></div>
+          </div>
+          <div class="grid-3">
+            <div><label>Bili Total</label><input id="lab_bili_total"></div>
+            <div><label>Directa</label><input id="lab_bili_directa"></div>
+            <div><label>Transcutánea</label><input id="lab_bili_trans"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3>🏷️ CIE-11</h3>
+          <div class="grid-3">
+            <div>
+              <label>Dx 1</label>
+              <select id="cie1">
+                <option value="">—</option>
+                <option>KA21.0 Ictericia neonatal</option>
+                <option>KA20.0 Prematuridad</option>
+                <option>KA40.0 Sepsis neonatal</option>
+                <option>KA23.0 SDR</option>
+                <option>KA24.0 TTRN</option>
+                <option>KA25.0 Asfixia perinatal</option>
+                <option>KA41.0 NEC</option>
+                <option>KB20.0 Incomp ABO</option>
+                <option>KB21.0 Incomp Rh</option>
+                <option>KA27.0 Hipoglicemia</option>
+              </select>
+            </div>
+            <div>
+              <label>Dx 2</label>
+              <select id="cie2">
+                <option value="">—</option>
+                <option>KA21.0 Ictericia neonatal</option>
+                <option>KA20.0 Prematuridad</option>
+                <option>KA40.0 Sepsis neonatal</option>
+                <option>KA23.0 SDR</option>
+                <option>KA24.0 TTRN</option>
+                <option>KA25.0 Asfixia perinatal</option>
+                <option>KA41.0 NEC</option>
+                <option>KB20.0 Incomp ABO</option>
+                <option>KB21.0 Incomp Rh</option>
+                <option>KA27.0 Hipoglicemia</option>
+              </select>
+            </div>
+            <div>
+              <label>Dx 3</label>
+              <select id="cie3">
+                <option value="">—</option>
+                <option>KA21.0 Ictericia neonatal</option>
+                <option>KA20.0 Prematuridad</option>
+                <option>KA40.0 Sepsis neonatal</option>
+                <option>KA23.0 SDR</option>
+                <option>KA24.0 TTRN</option>
+                <option>KA25.0 Asfixia perinatal</option>
+                <option>KA41.0 NEC</option>
+                <option>KB20.0 Incomp ABO</option>
+                <option>KB21.0 Incomp Rh</option>
+                <option>KA27.0 Hipoglicemia</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3>❤️ Tamizaje Cardíaco</h3>
+          <div class="tamizaje-grid">
+            <div>
+              <label>Mano derecha %</label>
+              <input id="tam_mano" type="number" min="70" max="100" placeholder="98">
+            </div>
+            <div>
+              <label>Pie %</label>
+              <input id="tam_pie" type="number" min="70" max="100" placeholder="97">
+            </div>
+            <div>
+              <label>Diferencia</label>
+              <div id="tam_diff" class="tam-result" style="min-width:90px">0.0</div>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <div id="tam_result" class="tam-result">—</div>
+            <div class="muted" style="margin-top:6px">Positivo si diferencia ≥3% o cualquier saturación &lt;95%</div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section class="card" style="margin-top:18px">
+      <h3>🩺 Interconsultas</h3>
+      <div class="chips" id="chipsIC">
+        <div class="chip" data-esp="Cardiología">Cardiología</div>
+        <div class="chip" data-esp="Neurología">Neurología</div>
+        <div class="chip" data-esp="Cirugía">Cirugía</div>
+        <div class="chip" data-esp="Infecto">Infecto</div>
+      </div>
+      <div id="interconsultas_list"></div>
+    </section>
+
+    <section class="card">
+      <h3>🖼️ Estudios</h3>
+      <div class="table-wrap">
+        <table class="table-compact">
+          <thead><tr><th>Estudio</th><th style="width:160px">Fecha</th><th>Hallazgos</th></tr></thead>
+          <tbody>
+            <tr><td>Rx Tórax</td><td><input id="est_rx_fecha" type="date"></td><td><input id="est_rx_hall" placeholder="Hallazgos..."></td></tr>
+            <tr><td>Eco</td><td><input id="est_eco_fecha" type="date"></td><td><input id="est_eco_hall" placeholder="Hallazgos..."></td></tr>
+            <tr><td>USG Transfontanelar</td><td><input id="est_usg_fecha" type="date"></td><td><input id="est_usg_hall" placeholder="Hallazgos..."></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h3 style="margin:0">📈 Seguimiento Diario</h3>
+        <button type="button" class="btn btn-sm" id="btnAddSeg">+ Agregar día</button>
+      </div>
+      <div class="table-wrap">
+        <table class="table-compact">
+          <thead><tr><th style="width:140px">Fecha</th><th style="width:110px">Peso (g)</th><th style="width:140px">Alimentación</th><th>Diuresis</th><th>Deposiciones</th><th>Plan</th><th style="width:50px"></th></tr></thead>
+          <tbody id="seg_tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>🚪 Egreso</h3>
+      <div class="egreso-options">
+        <label><input type="radio" name="egreso_tipo" value="Alta Médica"> Alta Médica</label>
+        <label><input type="radio" name="egreso_tipo" value="Traslado"> Traslado</label>
+        <label><input type="radio" name="egreso_tipo" value="Fallecido"> Fallecido</label>
+      </div>
+      <div id="egreso_alta" class="egreso-panel">
+        <div class="grid-2">
+          <div><label>Fecha alta</label><input id="egreso_alta_fecha" type="date"></div>
+          <div><label>Indicaciones</label><input id="egreso_alta_ind" placeholder="LM exclusiva, control..."></div>
+        </div>
+      <div id="egreso_traslado" class="egreso-panel">
+        <div class="grid-2">
+          <div><label>Hospital destino</label><input id="egreso_tras_hosp" placeholder="HMCR / HEU..."></div>
+          <div><label>Motivo</label><input id="egreso_tras_motivo" placeholder="Motivo de traslado"></div>
+        </div>
+      </div>
+      <div id="egreso_fallecido" class="egreso-panel">
+        <div class="grid-3">
+          <div><label>Fecha</label><input id="egreso_fal_fecha" type="date"></div>
+          <div><label>Hora</label><input id="egreso_fal_hora" type="time"></div>
+          <div><label>Causa</label><input id="egreso_fal_causa" placeholder="Causa básica"></div>
+        </div>
+      </div>
+    </section>
+
+    <button id="btnGuardar" type="button" class="btn-guardar">💾 Guardar Registro Neonatal</button>
+  </form>
+
+  <div class="section-title">📋 Resumen Hoy <span class="badge">HMCR</span></div>
+  <section class="card">
+    <div class="card-head">
+      <h3 style="margin:0">Pacientes activos</h3>
+      <button id="btnEnviarResumen" class="btn">📧 Enviar Resumen</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Nombre</th><th>Exp</th><th>Sala</th><th>Cama</th><th>Dx</th></tr></thead>
+        <tbody id="resumen_tbody"><tr><td colspan="5" class="muted" style="text-align:center; padding:18px">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>SEBAS v9.0 • Hospital Materno Infantil • Diseño para Neonatología • Honduras</footer>
+</main>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbxjtpIcyBpib6C561nZQppfB95PEy3G885n0-7-VLMp3RgjWleUvITdo_3C_OgF0qok/exec';
+
+const DEMO_DB = [
+  {expediente:'2024-001', nombre:'RN López García', sexo:'Hombre', fecha_nac:'2024-11-20', sala:'UCIN', cama:'2A', dx1:'KA21.0 Ictericia neonatal', peso_g:'2850', eg_sem:'36.2'},
+  {expediente:'2024-002', nombre:'RN Martínez Flores', sexo:'Mujer', fecha_nac:'2024-11-21', sala:'Neo Intermedios', cama:'5', dx1:'KA20.0 Prematuridad', peso_g:'1950', eg_sem:'33.5'},
+  {expediente:'2024-003', nombre:'RN Hernández Paz', sexo:'Hombre', fecha_nac:'2024-11-19', sala:'Neo Graves', cama:'1', dx1:'KA40.0 Sepsis neonatal', peso_g:'3100', eg_sem:'38'},
+  {expediente:'2024-004', nombre:'RN Castro Mejía', sexo:'Mujer', fecha_nac:'2024-11-22', sala:'Puerperio', cama:'12', dx1:'KA24.0 TTRN', peso_g:'3400', eg_sem:'39.1'},
+];
+
+const $ = (id)=>document.getElementById(id);
+const v = (id, val)=>{ const el=$(id); if(!el) return ''; if(val===undefined) return el.value||''; el.value=val; };
+
+function updateBtn(){
+  const sexo = v('ident_sexo');
+  const btn = $('btnGuardar');
+  if(sexo==='Hombre'){ btn.style.background='#3B82F6'; btn.innerHTML='👦 Guardar Registro Neonatal'; }
+  else if(sexo==='Mujer'){ btn.style.background='#EC4899'; btn.innerHTML='👧 Guardar Registro Neonatal'; }
+  else { btn.style.background='#52525b'; btn.innerHTML='💾 Guardar Registro Neonatal'; }
+}
+function calcTam(){
+  const m = parseFloat(v('tam_mano'))||0; const p = parseFloat(v('tam_pie'))||0;
+  const diff = Math.abs(m-p); $('tam_diff').textContent = diff.toFixed(1);
+  const box = $('tam_result');
+  if(m>0 && p>0){
+    if(diff<3 && m>=95 && p>=95){ box.textContent='🟢 Tamizaje Negativo'; box.className='tam-result neg'; }
+    else { box.textContent='🔴 Tamizaje Positivo - Derivar Cardio'; box.className='tam-result pos'; }
+  } else { box.textContent='—'; box.className='tam-result'; }
+}
+
+function addSeguimiento(data={}){
+  const tbody=$('seg_tbody'); const tr=document.createElement('tr');
+  const fecha = data.fecha || new Date().toISOString().split('T')[0];
+  tr.innerHTML = `
+    <td><input type="date" value="${fecha}"></td>
+    <td><input type="number" placeholder="g" value="${data.peso||''}"></td>
+    <td><select><option>LM</option><option>Formula</option><option>Mixta</option><option>NPO</option></select></td>
+    <td><input type="text" placeholder="cc/kg/d" value="${data.diuresis||''}"></td>
+    <td><input type="text" placeholder="+/++/+++" value="${data.deposiciones||''}"></td>
+    <td><input type="text" placeholder="Plan del día" value="${data.plan||''}"></td>
+    <td><button type="button" class="btn-del btn-sm" onclick="this.closest('tr').remove()">×</button></td>`;
+  tr.querySelector('select').value = data.alimentacion||'LM';
+  tbody.appendChild(tr);
+}
+
+function toggleEgreso(){
+  const tipo = document.querySelector('input[name="egreso_tipo"]:checked')?.value;
+  $('egreso_alta').style.display = tipo==='Alta Médica'?'block':'none';
+  $('egreso_traslado').style.display = tipo==='Traslado'?'block':'none';
+  $('egreso_fallecido').style.display = tipo==='Fallecido'?'block':'none';
+}
+
+function showResults(items){
+  const box=$('search_results'); box.innerHTML='';
+  if(!items.length){ box.innerHTML='<div class="result-item"><span>Sin resultados</span></div>'; }
+  else{
+    items.forEach(r=>{
+      const div=document.createElement('div'); div.className='result-item';
+      div.innerHTML=`<div><strong>${r.nombre}</strong><br><small>${r.expediente} • ${r.sala} Cama ${r.cama}</small></div><small>${r.dx1||''}</small>`;
+      div.onclick=()=>populateForm(r); box.appendChild(div);
+    });
+  }
+  box.classList.add('show');
+}
+function hideResults(){ $('search_results').classList.remove('show'); }
+
+async function buscar(){
+  const q=$('search').value.trim().toLowerCase(); if(!q) return hideResults();
+  // intento silencioso a Apps Script (no-cors para evitar error consola)
+  try{ await fetch(`${API_URL}?action=buscar&q=${encodeURIComponent(q)}`, {method:'GET', mode:'no-cors', cache:'no-store'}); }catch{}
+  const results = DEMO_DB.filter(r=>
+    r.nombre.toLowerCase().includes(q) ||
+    r.expediente.toLowerCase().includes(q) ||
+    (r.sala||'').toLowerCase().includes(q) ||
+    (r.cama||'').toLowerCase().includes(q) ||
+    (r.dx1||'').toLowerCase().includes(q)
+  );
+  showResults(results);
+}
+
+function populateForm(r){
+  v('ident_nombre', r.nombre); v('ident_expediente', r.expediente); v('ident_sexo', r.sexo);
+  v('ident_fecha_nac', r.fecha_nac||''); v('ident_peso', r.peso_g||''); v('ident_eg', r.eg_sem||'');
+  v('ubi_sala', r.sala); v('ubi_cama', r.cama); v('cie1', r.dx1||'');
+  updateBtn(); calcTam(); hideResults();
+  $('formRN').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function collectData(){
+  const inter = Array.from(document.querySelectorAll('#interconsultas_list .interconsulta-item')).map(it=>({
+    especialidad: it.dataset.esp, nota: it.querySelector('textarea').value
+  }));
+  const segs = Array.from(document.querySelectorAll('#seg_tbody tr')).map(tr=>{
+    const i=tr.querySelectorAll('input,select');
+    return {fecha:i[0].value, peso:i[1].value, alimentacion:i[2].value, diuresis:i[3].value, deposiciones:i[4].value, plan:i[5].value}
+  });
+  const egTipo = document.querySelector('input[name="egreso_tipo"]:checked')?.value||'';
+  return {
+    ts:new Date().toISOString(),
+    identificacion:{nombre:v('ident_nombre'), expediente:v('ident_expediente'), sexo:v('ident_sexo'), fecha_nac:v('ident_fecha_nac'), hora:v('ident_hora'), peso_g:v('ident_peso'), talla_cm:v('ident_talla'), pc_cm:v('ident_pc'), eg_sem:v('ident_eg'), apgar1:v('ident_apgar1'), apgar5:v('ident_apgar5')},
+    maternos:{nombre:v('mat_nombre'), edad:v('mat_edad'), g:v('mat_g'), p:v('mat_p'), c:v('mat_c'), a:v('mat_a'), rh:v('mat_rh'), vih:v('mat_vih'), rpr:v('mat_rpr'), hb:v('mat_hb'), hto:v('mat_hto')},
+    ubicacion:{sala:v('ubi_sala'), cama:v('ubi_cama'), direccion:v('ubi_direccion'), telefono:v('ubi_telefono')},
+    laboratorios:{rh:v('lab_rh'), rpr:v('lab_rpr'), hb:v('lab_hb'), hto:v('lab_hto'), bili_total:v('lab_bili_total'), bili_directa:v('lab_bili_directa'), bili_trans:v('lab_bili_trans'), gluco:v('lab_gluco')},
+    cie11:{dx1:v('cie1'), dx2:v('cie2'), dx3:v('cie3')},
+    tamizaje:{mano:v('tam_mano'), pie:v('tam_pie'), diff:$('tam_diff').textContent, resultado:$('tam_result').textContent},
+    interconsultas:inter,
+    estudios:[
+      {tipo:'Rx Tórax', fecha:v('est_rx_fecha'), hallazgos:v('est_rx_hall')},
+      {tipo:'Eco', fecha:v('est_eco_fecha'), hallazgos:v('est_eco_hall')},
+      {tipo:'USG Transfontanelar', fecha:v('est_usg_fecha'), hallazgos:v('est_usg_hall')}
+    ],
+    seguimiento:segs,
+    egreso:{tipo:egTipo, alta_fecha:v('egreso_alta_fecha'), alta_ind:v('egreso_alta_ind'), tras_hosp:v('egreso_tras_hosp'), tras_motivo:v('egreso_tras_motivo'), fal_fecha:v('egreso_fal_fecha'), fal_hora:v('egreso_fal_hora'), fal_causa:v('egreso_fal_causa')}
+  }
+}
+
+function clearForm(){
+  $('formRN').reset();
+  $('interconsultas_list').innerHTML='';
+  $('seg_tbody').innerHTML=''; addSeguimiento();
+  $('tam_diff').textContent='0.0'; $('tam_result').textContent='—'; $('tam_result').className='tam-result';
+  document.querySelectorAll('input[name="egreso_tipo"]').forEach(r=>r.checked=false); toggleEgreso();
+  updateBtn();
+  localStorage.removeItem('sebas_backup');
+}
+
+async function guardar(){
+  const btn=$('btnGuardar'); btn.disabled=true; const prev=btn.innerHTML;
+  btn.innerHTML='<span class="spinner"></span> Guardando...';
+  const data = collectData();
+  try{
+    localStorage.setItem('sebas_backup', JSON.stringify(data));
+    await fetch(API_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(data)});
+  }catch(e){ console.warn('POST error', e); }
+  // siempre mostramos el mensaje solicitado
+  alert('ya soy tu amiguito Sebastian!');
+  clearForm();
+  btn.disabled=false; btn.innerHTML=prev; updateBtn();
+  cargarResumen();
+}
+
+function renderResumen(rows){
+  const tb=$('resumen_tbody'); tb.innerHTML='';
+  if(!rows.length){ tb.innerHTML='<tr><td colspan="5" class="muted" style="text-align:center;padding:16px">Sin pacientes hoy</td></tr>'; return; }
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.nombre||''}</td><td>${r.exp||r.expediente||''}</td><td>${r.sala||''}</td><td>${r.cama||''}</td><td>${r.dx||r.dx1||''}</td>`;
+    tr.style.cursor='pointer'; tr.title='Cargar paciente';
+    tr.onclick=()=>populateForm({nombre:r.nombre, expediente:r.exp, sala:r.sala, cama:r.cama, dx1:r.dx, sexo:'', fecha_nac:''});
+    tb.appendChild(tr);
+  });
+}
+
+async function cargarResumen(){
+  // intento silencioso
+  try{ await fetch(`${API_URL}?action=resumen`, {method:'GET', mode:'no-cors'}); }catch{}
+  const data = DEMO_DB.map(d=>({nombre:d.nombre, exp:d.expediente, sala:d.sala, cama:d.cama, dx:d.dx1}));
+  renderResumen(data);
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  // eventos
+  $('btnBuscar').onclick=buscar;
+  $('search').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); buscar(); }});
+  document.addEventListener('click', e=>{ if(!e.target.closest('.search-wrap')) hideResults(); });
+  $('ident_sexo').addEventListener('change', updateBtn);
+  $('tam_mano').addEventListener('input', calcTam); $('tam_pie').addEventListener('input', calcTam);
+  $('btnAddSeg').onclick=()=>addSeguimiento();
+  document.querySelectorAll('input[name="egreso_tipo"]').forEach(r=>r.addEventListener('change', toggleEgreso));
+  document.querySelectorAll('#chipsIC .chip').forEach(ch=>{
+    ch.onclick=()=>{
+      const esp=ch.dataset.esp; if(document.querySelector(`#interconsultas_list [data-esp="${esp}"]`)) return;
+      const div=document.createElement('div'); div.className='interconsulta-item'; div.dataset.esp=esp;
+      div.innerHTML=`<label>${esp} — Qué dijo el Dr:</label><textarea rows="2" placeholder="Hallazgos y recomendaciones..."></textarea><button type="button" onclick="this.parentElement.remove()">Eliminar</button>`;
+      $('interconsultas_list').appendChild(div);
+    }
+  });
+  $('btnGuardar').onclick=guardar;
+  $('btnEnviarResumen').onclick=async ()=>{
+    try{ await fetch(`${API_URL}?action=enviarResumen`, {method:'GET', mode:'no-cors'}); }catch{}
+    alert('Resumen enviado a coordinación HMCR');
+  };
+
+  // init
+  updateBtn(); calcTam(); addSeguimiento(); toggleEgreso(); cargarResumen();
+
+  // restaurar backup si existe
+  const bak = localStorage.getItem('sebas_backup');
+  if(bak){ try{ const d=JSON.parse(bak); if(d.identificacion?.nombre){ if(confirm('¿Restaurar registro no guardado?')){ populateForm({nombre:d.identificacion.nombre, expediente:d.identificacion.expediente, sexo:d.identificacion.sexo, sala:d.ubicacion.sala, cama:d.ubicacion.cama, dx1:d.cie11.dx1}); } } }catch{} }
+});
+</script>
+</body>
+</html>
